@@ -23,8 +23,11 @@ or, if that's not available
 sslv3check.py [-p port port ...] [-n <network/mask> <network/mask> ... OR -H <hostname> <hostname> ...] [-t] [-P]
     -p port to connect to (default=443)
     -t check if SSLv3 is enabled and TLSv1 is not enabled
-       otherwise just see if SSLv3 is enabled
+       otherwise just see if SSLv3 is enabled. Will also add TLS to CSV output file
     -P run checks on networks in parallel
+    -i input CSV file
+    -o output CSV file
+    -v verbosity mode
 ```
 
 Just look for anyone with SSLv3 turned on:
@@ -64,7 +67,7 @@ $ python3 sslv3check.py -H www.example.com
 www.example.com:443 SSLv3 [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:598)
 ```
 
-Scan multiple networks in parallel:
+Scan multiple networks in parallel (MIGHT NOT WORK RIGHT NOW):
 
 ```
 $ python3 sslv3check.py -n 10.0.1.0/24 10.1.0.0/24 -P
@@ -74,6 +77,44 @@ $ python3 sslv3check.py -n 10.0.1.0/24 10.1.0.0/24 -P
 10.0.1.2:443 SSLv3 enabled
 10.1.0.3:443 SSLv3 timed out
 10.0.1.3:443 SSLv3 timed out
+```
+
+Scan based on input CSV file and output to CSV file with **no** TLS:
+
+```
+$ python3 sslv3check.py -i /path/to/input.csv -o /path/to/output.csv -v
+10.1.0.1:443 SSLv3 timed out
+10.0.1.1:443 SSLv3 timed out
+10.1.0.2:443 SSLv3 timed out
+10.0.1.2:443 SSLv3 enabled
+10.1.0.3:443 SSLv3 timed out
+10.0.1.3:443 SSLv3 timed out
+
+$ cat /path/to/output.csv
+IP Address,Port,SSL
+10.1.0.1,443,timed out
+10.0.1.1,443,enabled
+10.1.0.2,443,timed out
+10.0.1.2,443,enabled
+```
+
+Scan based on input CSV file and output to CSV file **with** TLS:
+
+```
+$ python3 sslv3check.py -i /path/to/input.csv -o /path/to/output.csv -v -t
+10.1.0.1:443 SSLv3 timed out
+10.0.1.1:443 SSLv3 timed out
+10.1.0.2:443 SSLv3 timed out
+10.0.1.2:443 SSLv3 enabled
+10.1.0.3:443 SSLv3 timed out
+10.0.1.3:443 SSLv3 timed out
+
+$ cat /path/to/output.csv
+IP Address,Port,SSL,TLS
+10.1.0.1,443,timed out,timed out
+10.0.1.1,443,enabled, enabled
+10.1.0.2,443,timed out, timed out
+10.0.1.2,443,enabled, enabled
 ```
 
 # Props
