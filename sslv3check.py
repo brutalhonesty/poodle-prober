@@ -90,11 +90,12 @@ def main():
         for network in args['network']:
             net.add(IPy.IP(network))
     elif args['input']:
+        net = []
         input_file = _validate_input(args['input'])
         with open(input_file, newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',', quotechar='"')
             for row in reader:
-                net.add(IPy.IP('\n'.join(row)))
+                net.append(IPy.IP(row[0]))
     else:
         raise Exception('Missing network or input file.')
 
